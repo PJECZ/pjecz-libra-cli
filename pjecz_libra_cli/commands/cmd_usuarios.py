@@ -2,8 +2,10 @@
 Command Usuarios
 """
 
+import csv
 import os
 import sys
+from pathlib import Path
 
 import click
 from dotenv import load_dotenv
@@ -22,9 +24,10 @@ def cli():
 
 
 @click.command()
-def consultar():
+@click.option("--output", default="usuarios.csv", type=str, help="Nombre del archivo CSV a crear")
+def consultar(output):
     """Consultar usuarios"""
-    click.echo("Consultando usuarios")
+    click.echo("Consultando usuarios: ", nl=False)
 
     # Validar HERCULES_API_BASE_URL
     if HERCULES_API_BASE_URL is None:
@@ -36,11 +39,11 @@ def consultar():
         click.echo(click.style("FALTA: La variable de entorno HERCULES_API_KEY", fg="red"))
         sys.exit(1)
 
-    # Inicializar el limit y el offset para hacer la paginación
-    limit = None
-    offset = 0
+    # Inicializar listado de usuarios
+    usuarios = []
 
     # Bucle para hacer la paginación
+    offset = 0
     while True:
         # Consultar a Hercules API Key
         try:
@@ -83,9 +86,17 @@ def consultar():
 
         # Bucle entre los usuarios
         for usuario in datos["data"]:
-            click.echo(usuario["email"])
+            usuarios.append(
+                [
+                    usuario["email"],
+                    usuario["nombres"],
+                    usuario["apellido_paterno"],
+                    usuario["apellido_materno"],
+                ]
+            )
+            click.echo(".", nl=False)
 
-        # Definir el limit
+        # Tomar el limit e incrementar el offset
         limit = datos["limit"]
         offset += limit
 
@@ -93,9 +104,22 @@ def consultar():
         if offset >= datos["total"]:
             break
 
+    # Si se dio output
+    if output:
+        # Si existe el archivo, eliminarlo
+        ruta = Path(output)
+        if ruta.is_file():
+            ruta.unlink()
+
+        # Escribir
+        with open(ruta, "w", encoding="utf8") as puntero:
+            archivo_csv = csv.writer(puntero)
+            archivo_csv.writerow(["email", "nombres", "apellido_paterno", "apellido_materno"])
+            archivo_csv.writerows(usuarios)
+
     # Mensaje final
     click.echo()
-    click.echo(click.style("Termina la consulta", fg="green"))
+    click.echo(click.style(f"Termina la consulta con {len(usuarios)} usuarios", fg="green"))
 
 
 cli.add_command(consultar)

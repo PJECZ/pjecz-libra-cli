@@ -19,7 +19,10 @@ Ingresar al entorno virtual
 Actualizar e instalar **poetry 2**
 
 ```bash
-pip install --upgrade pip setuptools wheel poetry
+pip install --upgrade pip 
+pip install --upgrade setuptools
+pip install wheel
+pip install poetry
 ```
 
 Crear un archivo para las variables de entorno
@@ -28,19 +31,24 @@ Crear un archivo para las variables de entorno
 nano .env
 ```
 
+Instalar el CLI
+
+```bash
+poetry install
+```
+
 Escriba las siguientes variables cambiándolas a sus requerimientos
 
 ```ini
+# Hercules API Key
+HERCULES_API_BASE_URL="https://datos.XXXXXXXXXXXX.gob.mx/api/v5"
+HERCULES_API_KEY="XXXXXXXX.XXXXXXXX.XXXXXXXXXXXXXXXXXXXXXXXX"
+LIMIT=10
+TIMEOUT=30
 ```
 
-Instalar en este entorno el comando `hercules`
+Ejecutar el CLI
 
 ```bash
-pip install --editable .
-```
-
-Probar que funcione el CLI
-
-```bash
-hercules --help
+cli --help
 ```
